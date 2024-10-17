@@ -1,9 +1,9 @@
 package router_test
 
 import (
-	"lib/go/router"
 	"net/http"
 	"net/http/httptest"
+	"rango/router"
 	"testing"
 )
 

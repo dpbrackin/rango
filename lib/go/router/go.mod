@@ -1,3 +1,3 @@
-module lib/go/router
+module rango/router
 
 go 1.23

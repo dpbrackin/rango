@@ -2,6 +2,8 @@ go 1.23
 
 use (
 	./apps/api
+	./lib/go/auth
 	./lib/go/core
+	./lib/go/db
 	./lib/go/router
 )

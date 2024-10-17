@@ -1,5 +1,5 @@
 {
-  "name": "router",
+  "name": "go/router",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "lib/go/router",
