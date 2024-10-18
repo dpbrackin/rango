@@ -5,8 +5,8 @@ sql:
     schema: "migrations/"
     gen:
       go:
-        package: "repository"
-        out: "repository"
+        package: "generated"
+        out: "generated"
         sql_package: "pgx/v5"
         overrides:
           - db_type: "timestamptz"
