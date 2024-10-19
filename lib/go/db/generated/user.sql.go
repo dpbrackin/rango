@@ -7,7 +7,6 @@ package generated
 
 import (
 	"context"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -35,10 +34,10 @@ WHERE sessions.id = $1
 type GetSessionRow struct {
 	ID           string
 	UserID       pgtype.Int4
-	CreatedAt    time.Time
-	RevokedAt    time.Time
-	ExpiresAt    time.Time
-	LastActiveAt time.Time
+	CreatedAt    pgtype.Timestamptz
+	RevokedAt    pgtype.Timestamptz
+	ExpiresAt    pgtype.Timestamptz
+	LastActiveAt pgtype.Timestamptz
 	Username     string
 }
 

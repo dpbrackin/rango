@@ -8,13 +8,3 @@ sql:
         package: "generated"
         out: "generated"
         sql_package: "pgx/v5"
-        overrides:
-          - db_type: "timestamptz"
-            go_type:
-              import: "time"
-              type: "Time"
-          - db_type: "timestamptz"
-            go_type:
-              import: "time"
-              type: "Time"
-            nullable: true

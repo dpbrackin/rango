@@ -31,15 +31,13 @@ func (p *PGAuthRepository) GetSession(ctx context.Context, sessionID string) (au
 	}
 
 	return auth.Session{
-		ID: session.ID,
-		User: core.User{
-			Username: session.Username,
-			ID:       core.IDType(session.UserID.Int32),
-		},
-		CreatedAt:    session.CreatedAt,
-		RevokedAt:    session.RevokedAt,
-		ExpiresAt:    session.ExpiresAt,
-		LastActiveAt: session.LastActiveAt,
+		ID:           session.ID,
+		User:         core.User{Username: session.Username, ID: core.IDType(session.UserID.Int32)},
+		CreatedAt:    session.CreatedAt.Time,
+		RevokedAt:    session.RevokedAt.Time,
+		ExpiresAt:    session.ExpiresAt.Time,
+		LastActiveAt: session.LastActiveAt.Time,
+		IsRevoked:    session.ExpiresAt.Valid,
 	}, nil
 }
 
