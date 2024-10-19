@@ -89,3 +89,65 @@ func TestValidAuthenticateSession(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, validSession.User, res)
 }
+
+func TestExpiredSession(t *testing.T) {
+	expiredSession := auth.Session{
+		ID: "session1",
+		User: core.User{
+			Username: "user1",
+			ID:       core.IDType(1),
+		},
+		CreatedAt:    time.Date(2023, 12, 12, 0, 0, 0, 0, time.UTC),
+		RevokedAt:    time.Time{},
+		ExpiresAt:    time.Date(2024, 12, 12, 0, 0, 0, 0, time.UTC),
+		LastActiveAt: time.Date(2024, 12, 12, 0, 0, 0, 0, time.UTC),
+		IsRevoked:    false,
+	}
+
+	repository := new(mockAuthRepository)
+	repository.On("GetSession", mock.Anything, "session1").Return(expiredSession, nil)
+
+	fakeClock := new(mockClock)
+	fakeClock.On("Now").Return(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC))
+
+	service := auth.NewAuthService(auth.NewAuthServiceParams{
+		Repository: repository,
+		Clock:      fakeClock,
+	})
+
+	ctx := context.Background()
+	_, err := service.AuthenticateSession(ctx, "session1")
+
+	assert.NotNil(t, err)
+}
+
+func TestRevokedSession(t *testing.T) {
+	revokedSession := auth.Session{
+		ID: "session1",
+		User: core.User{
+			Username: "user1",
+			ID:       core.IDType(1),
+		},
+		CreatedAt:    time.Date(2022, 12, 12, 0, 0, 0, 0, time.UTC),
+		RevokedAt:    time.Date(2024, 12, 12, 0, 0, 0, 0, time.UTC),
+		ExpiresAt:    time.Date(2025, 12, 12, 0, 0, 0, 0, time.UTC),
+		LastActiveAt: time.Date(2024, 12, 12, 0, 0, 0, 0, time.UTC),
+		IsRevoked:    true,
+	}
+
+	repository := new(mockAuthRepository)
+	repository.On("GetSession", mock.Anything, "session1").Return(revokedSession, nil)
+
+	fakeClock := new(mockClock)
+	fakeClock.On("Now").Return(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC))
+
+	service := auth.NewAuthService(auth.NewAuthServiceParams{
+		Repository: repository,
+		Clock:      fakeClock,
+	})
+
+	ctx := context.Background()
+	_, err := service.AuthenticateSession(ctx, "session1")
+
+	assert.NotNil(t, err)
+}
