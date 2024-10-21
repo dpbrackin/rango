@@ -9,7 +9,13 @@ import (
 )
 
 type PGAuthRepository struct {
-	queries generated.Queries
+	queries *generated.Queries
+}
+
+func NewPGAuthRepository(queries *generated.Queries) *PGAuthRepository {
+	return &PGAuthRepository{
+		queries: queries,
+	}
 }
 
 // AddUser implements auth.AuthRepository.
