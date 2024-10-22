@@ -42,6 +42,7 @@ func (srv *AuthService) AuthenticateWithPassword(ctx context.Context, creds Pass
 
 	user = core.User{
 		Username: dbUser.Username,
+		ID:       dbUser.ID,
 	}
 
 	return user, nil
@@ -89,4 +90,22 @@ func (srv *AuthService) AuthenticateSession(ctx context.Context, sessionID strin
 	}
 
 	return session.User, nil
+}
+
+func (srv *AuthService) CreateSession(ctx context.Context, user core.User) (*Session, error) {
+	session, err := NewSession(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = srv.repository.CreateSession(ctx, *session)
+
+	if err != nil {
+		return nil, err
+	}
+
+	createdSession, err := srv.repository.GetSession(ctx, session.ID)
+
+	return &createdSession, err
 }

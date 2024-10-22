@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"rango/auth"
+	"time"
 )
 
 type AuthHandler struct {
@@ -34,7 +35,7 @@ func (handler *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = handler.Srv.AuthenticateWithPassword(ctx, auth.PasswordCredentials{
+	user, err := handler.Srv.AuthenticateWithPassword(ctx, auth.PasswordCredentials{
 		Username: body.Username,
 		Password: body.Password,
 	})
@@ -46,6 +47,30 @@ func (handler *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session, err := handler.Srv.CreateSession(ctx, user)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	cookie := &http.Cookie{
+		Name:     "sessionID",
+		Value:    session.ID,
+		Quoted:   false,
+		Expires:  session.ExpiresAt,
+		MaxAge:   int(session.ExpiresAt.Sub(time.Now()).Seconds()),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	http.SetCookie(w, cookie)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(session)
 }
 
 func (handler *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {

@@ -12,7 +12,7 @@ import (
 )
 
 const addUser = `-- name: AddUser :exec
-INSERT INTO users(username, password) VALUES($1,$2)
+INSERT INTO users(username, password) VALUES ($1,$2)
 `
 
 type AddUserParams struct {
@@ -22,6 +22,21 @@ type AddUserParams struct {
 
 func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) error {
 	_, err := q.db.Exec(ctx, addUser, arg.Username, arg.Password)
+	return err
+}
+
+const createSession = `-- name: CreateSession :exec
+INSERT INTO sessions(id, user_id, expires_at) VALUES ($1, $2, $3)
+`
+
+type CreateSessionParams struct {
+	ID        string
+	UserID    pgtype.Int4
+	ExpiresAt pgtype.Timestamptz
+}
+
+func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) error {
+	_, err := q.db.Exec(ctx, createSession, arg.ID, arg.UserID, arg.ExpiresAt)
 	return err
 }
 

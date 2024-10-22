@@ -6,6 +6,8 @@ import (
 	"rango/auth"
 	"rango/core"
 	"rango/db/generated"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type PGAuthRepository struct {
@@ -62,4 +64,20 @@ func (p *PGAuthRepository) GetUserByUsername(ctx context.Context, username strin
 		},
 		Password: user.Password,
 	}, nil
+}
+
+func (p *PGAuthRepository) CreateSession(ctx context.Context, session auth.Session) error {
+	err := p.queries.CreateSession(ctx, generated.CreateSessionParams{
+		ID: session.ID,
+		UserID: pgtype.Int4{
+			Int32: int32(session.User.ID),
+			Valid: true,
+		},
+		ExpiresAt: pgtype.Timestamptz{
+			Time:  session.ExpiresAt,
+			Valid: true,
+		},
+	})
+
+	return err
 }

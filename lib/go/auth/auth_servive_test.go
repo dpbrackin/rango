@@ -58,6 +58,13 @@ func (m *mockAuthRepository) GetUserByUsername(ctx context.Context, username str
 	return user, args.Error(1)
 }
 
+// CreateSession implements auth.AuthRepository.
+func (m *mockAuthRepository) CreateSession(ctx context.Context, session auth.Session) error {
+	args := m.Called(ctx, session)
+
+	return args.Error(0)
+}
+
 func TestValidAuthenticateSession(t *testing.T) {
 	validSession := auth.Session{
 		ID: "session1",
