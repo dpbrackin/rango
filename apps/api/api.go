@@ -69,6 +69,13 @@ func (api *API) BuildRoutes() {
 	unauthenticatedGroup := api.rootRouter.Group("")
 	unauthenticatedGroup.RouteFunc("POST /login", authHandler.Login)
 	unauthenticatedGroup.RouteFunc("POST /register", authHandler.Register)
+
+	authenticatedGroup := api.rootRouter.Group("")
+	authenticatedGroup.Use(AuthMiddleware(api.authService))
+	authenticatedGroup.RouteFunc("GET /test", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 }
 
 func (api *API) Serve(addr string) {
