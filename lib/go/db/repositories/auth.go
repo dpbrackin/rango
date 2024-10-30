@@ -45,7 +45,7 @@ func (p *PGAuthRepository) GetSession(ctx context.Context, sessionID string) (au
 		RevokedAt:    session.RevokedAt.Time,
 		ExpiresAt:    session.ExpiresAt.Time,
 		LastActiveAt: session.LastActiveAt.Time,
-		IsRevoked:    session.ExpiresAt.Valid,
+		IsRevoked:    session.RevokedAt.Valid,
 	}, nil
 }
 
