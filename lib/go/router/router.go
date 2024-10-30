@@ -3,6 +3,7 @@ package router
 
 import (
 	"net/http"
+	"slices"
 )
 
 type Root struct {
@@ -22,7 +23,7 @@ type RouteGroup struct {
 type Middleware func(next http.Handler) http.Handler
 
 func applyMiddlewares(f http.Handler, m []Middleware) http.Handler {
-	for _, middleware := range m {
+	for _, middleware := range slices.Backward(m) {
 		f = middleware(f)
 	}
 
@@ -80,8 +81,10 @@ func (router *Root) BuildMux() *http.ServeMux {
 	}
 
 	for _, group := range router.groups {
+		middlewares := append(router.middlewares, group.middlewares...)
+
 		for route, handler := range group.routes {
-			handlerWithMiddlewares := applyMiddlewares(handler, append(router.middlewares, group.middlewares...))
+			handlerWithMiddlewares := applyMiddlewares(handler, middlewares)
 
 			method, host, path := parsePattern(route)
 
