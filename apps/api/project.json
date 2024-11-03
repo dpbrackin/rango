@@ -12,9 +12,10 @@
       }
     },
     "serve": {
-      "executor": "@nx-go/nx-go:serve",
+      "executor": "nx:run-commands",
       "options": {
-        "main": "{projectRoot}/*.go"
+      "cwd": "apps/api",
+        "command": "air"
       }
     },
     "test": {
