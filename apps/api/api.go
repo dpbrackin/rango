@@ -8,10 +8,10 @@ import (
 	"rango/api/handlers"
 	"rango/api/internal"
 	"rango/auth"
-	"rango/db/generated"
-	"rango/db/repositories"
+	"rango/platform/db/generated"
+	"rango/platform/db/repositories"
+	"rango/platform/storage"
 	"rango/router"
-	"rango/storage"
 	"time"
 
 	"github.com/jackc/pgx/v5"

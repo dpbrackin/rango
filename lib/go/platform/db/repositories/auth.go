@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"rango/auth"
 	"rango/core"
-	"rango/db/generated"
+	"rango/platform/db/generated"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )

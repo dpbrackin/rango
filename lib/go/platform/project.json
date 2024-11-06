@@ -1,8 +1,8 @@
 {
-  "name": "go/db",
+  "name": "lib/go/platform",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "lib/go/db",
+  "sourceRoot": "lib/go/platform",
   "tags": [],
   "targets": {
     "test": {

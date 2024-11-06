@@ -1,4 +1,4 @@
-module rango/db
+module rango/platform
 
 go 1.23
 

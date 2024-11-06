@@ -23,14 +23,32 @@ func NewDiscStorage(params NewDiscStorageParams) *DiskStorage {
 	}
 }
 
+func (s *DiskStorage) getAbsolutePath(name string) string {
+	return filepath.Join(s.BasePath, name)
+}
+
 // Download implements core.DocumentBackend.
-func (s *DiskStorage) Download(ctx context.Context, w io.Writer) error {
-	panic("unimplemented")
+func (s *DiskStorage) Download(ctx context.Context, name string, w io.Writer) error {
+	path := s.getAbsolutePath(name)
+
+	f, err := os.Open(path)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(w, f)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Upload implements core.DocumentBackend.
 func (s *DiskStorage) Upload(ctx context.Context, params core.UploadParams) (path string, err error) {
-	path = filepath.Join(s.BasePath, params.Name)
+	path = s.getAbsolutePath(params.Name)
 
 	file, err := os.Create(path)
 

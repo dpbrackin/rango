@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 	"rango/core"
-	"rango/db/generated"
+	"rango/platform/db/generated"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -19,8 +19,8 @@ func NewPGDocumentRepository(queries *generated.Queries) *PGDocumentsRepository 
 }
 
 // AddDocument implements core.DocumentRepository.
-func (p *PGDocumentsRepository) AddDocument(ctx context.Context, d core.Document) error {
-	err := p.queries.AddDocument(ctx, generated.AddDocumentParams{
+func (p *PGDocumentsRepository) AddDocument(ctx context.Context, d core.Document) (core.Document, error) {
+	doc, err := p.queries.AddDocument(ctx, generated.AddDocumentParams{
 		UserID: pgtype.Int4{
 			Int32: int32(d.Owner.ID),
 			Valid: true,
@@ -28,5 +28,11 @@ func (p *PGDocumentsRepository) AddDocument(ctx context.Context, d core.Document
 		Source: d.Source,
 	})
 
-	return err
+	document := core.Document{
+		ID:     core.IDType(doc.ID),
+		Source: d.Source,
+		Owner:  d.Owner,
+	}
+
+	return document, err
 }

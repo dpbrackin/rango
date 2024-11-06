@@ -11,11 +11,12 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const addDocument = `-- name: AddDocument :exec
+const addDocument = `-- name: AddDocument :one
 INSERT INTO documents(
   user_id,
   source
 ) values ($1, $2)
+RETURNING id, user_id, source
 `
 
 type AddDocumentParams struct {
@@ -23,9 +24,11 @@ type AddDocumentParams struct {
 	Source string
 }
 
-func (q *Queries) AddDocument(ctx context.Context, arg AddDocumentParams) error {
-	_, err := q.db.Exec(ctx, addDocument, arg.UserID, arg.Source)
-	return err
+func (q *Queries) AddDocument(ctx context.Context, arg AddDocumentParams) (Document, error) {
+	row := q.db.QueryRow(ctx, addDocument, arg.UserID, arg.Source)
+	var i Document
+	err := row.Scan(&i.ID, &i.UserID, &i.Source)
+	return i, err
 }
 
 const getDocument = `-- name: GetDocument :one

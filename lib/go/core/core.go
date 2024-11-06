@@ -25,7 +25,7 @@ type Document struct {
 }
 
 type DocumentRepository interface {
-	AddDocument(ctx context.Context, d Document) error
+	AddDocument(ctx context.Context, d Document) (Document, error)
 }
 
 type UploadParams struct {
@@ -38,5 +38,10 @@ type StorageBackend interface {
 	//
 	// A successful upload returns a path which can be used to retrive the contents and err == nil.
 	Upload(ctx context.Context, params UploadParams) (path string, err error)
-	Download(ctx context.Context, w io.Writer) error
+	Download(ctx context.Context, name string, w io.Writer) error
+}
+
+// Index is takes a document and indexes it
+type Indexer interface {
+	Index(ctx context.Context, d Document) error
 }
