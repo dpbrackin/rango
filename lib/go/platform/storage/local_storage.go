@@ -37,6 +37,8 @@ func (s *DiskStorage) Download(ctx context.Context, name string, w io.Writer) er
 		return err
 	}
 
+	defer f.Close()
+
 	_, err = io.Copy(w, f)
 
 	if err != nil {
@@ -55,9 +57,10 @@ func (s *DiskStorage) Upload(ctx context.Context, params core.UploadParams) (pat
 	if err != nil {
 		return "", fmt.Errorf("Failed to create file on disk: %w", err)
 	}
+
 	defer file.Close()
 
 	_, err = io.Copy(file, params.Reader)
 
-	return path, err
+	return params.Name, err
 }
