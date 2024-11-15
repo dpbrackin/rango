@@ -45,7 +45,7 @@ func (e *EventBus) Publish(event Event) {
 
 func (e *EventBus) Close() {
 	e.mu.Lock()
-	e.mu.Unlock()
+	defer e.mu.Unlock()
 
 	for _, subscribers := range e.subscribers {
 		for _, ch := range subscribers {

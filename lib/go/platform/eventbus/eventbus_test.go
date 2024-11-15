@@ -1,7 +1,7 @@
 package eventbus_test
 
 import (
-	eventbus "rango/platform/event_bus"
+	"rango/platform/eventbus"
 	"reflect"
 	"testing"
 )
