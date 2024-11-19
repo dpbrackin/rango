@@ -36,12 +36,12 @@ type UploadParams struct {
 type StorageBackend interface {
 	// Upload saves the contents of the reader into persistent storage.
 	//
-	// A successful upload returns a path which can be used to retrive the contents and err == nil.
+	// A successful upload returns a path which can be used to retrieve the contents and err == nil.
 	Upload(ctx context.Context, params UploadParams) (path string, err error)
 	Download(ctx context.Context, name string, w io.Writer) error
 }
 
-// Index is takes a document and indexes it
-type Indexer interface {
-	Index(ctx context.Context, d Document) error
+// Embedder creates embeddings for an input
+type Embedder interface {
+	Embed(ctx context.Context, content io.Reader) ([][]float64, error)
 }
