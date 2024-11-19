@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"rango/api/internal"
 	"rango/auth"
 	"rango/platform/db/generated"
@@ -12,6 +13,7 @@ import (
 	"rango/platform/eventbus"
 	"rango/platform/storage"
 	"rango/router"
+	"syscall"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -45,7 +47,14 @@ func main() {
 
 	addRoutes(app)
 
+	done := make(chan bool, 1)
+
+	go app.gracefulShutdown(done)
+
 	app.ServeHttp(":3000")
+
+	<-done
+	log.Println("Gracefully shutdown")
 }
 
 // App is a container for all services needed for the http api and background workers
@@ -54,18 +63,44 @@ type App struct {
 	authSrv     *auth.AuthService
 	documentSrv *internal.DocumentService
 	eventBus    *eventbus.EventBus
+	server      *http.Server
 }
 
 func (app *App) ServeHttp(addr string) {
 	mux := app.router.BuildMux()
+	server := &http.Server{
+		Addr:    addr,
+		Handler: mux,
+	}
+	app.server = server
 
 	log.Printf("Listening on %s", addr)
 
-	err := http.ListenAndServe(addr, mux)
+	err := server.ListenAndServe()
 
-	if err != nil {
+	if err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
+}
+
+func (app *App) gracefulShutdown(done chan bool) {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	<-ctx.Done()
+
+	log.Println("shutting down gracefully, press Ctrl+C again to force")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := app.server.Shutdown(ctx); err != nil {
+		log.Printf("Server forced to shudown with error: %v", err)
+	}
+
+	log.Println("Server exiting")
+
+	done <- true
 }
 
 type RealClock struct{}
