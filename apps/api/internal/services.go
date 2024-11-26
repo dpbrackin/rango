@@ -64,6 +64,7 @@ func (s *DocumentService) CreateDocument(ctx context.Context, params AddDocument
 	return &doc, err
 }
 
+// ExtractContent extracts the text content from the document and persists it
 func (s *DocumentService) ExtractContent(ctx context.Context, doc *core.Document) error {
 	var extractor core.ContentExtractor
 

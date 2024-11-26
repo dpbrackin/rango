@@ -29,6 +29,7 @@ type Document struct {
 type DocumentRepository interface {
 	AddDocument(ctx context.Context, d Document) (Document, error)
 	UpdateDocument(ctx context.Context, d Document) error
+	GetDocument(ctx context.Context, id IDType) (Document, error)
 }
 
 type UploadParams struct {

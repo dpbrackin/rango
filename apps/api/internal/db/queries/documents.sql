@@ -8,7 +8,9 @@ INSERT INTO documents(
 RETURNING *;
 --
 -- name: GetDocument :one
-SELECT * FROM documents WHERE id = $1;
+SELECT documents.*, users.username
+FROM documents JOIN users on users.id = documents.user_id
+WHERE documents.id = $1;
 --
 -- name: UpdateDocument :exec
 UPDATE documents

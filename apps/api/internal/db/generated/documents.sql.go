@@ -47,18 +47,30 @@ func (q *Queries) AddDocument(ctx context.Context, arg AddDocumentParams) (Docum
 }
 
 const getDocument = `-- name: GetDocument :one
-SELECT id, user_id, source, content, type FROM documents WHERE id = $1
+SELECT documents.id, documents.user_id, documents.source, documents.content, documents.type, users.username
+FROM documents JOIN users on users.id = documents.user_id
+WHERE documents.id = $1
 `
 
-func (q *Queries) GetDocument(ctx context.Context, id int32) (Document, error) {
+type GetDocumentRow struct {
+	ID       int32
+	UserID   pgtype.Int4
+	Source   string
+	Content  pgtype.Text
+	Type     string
+	Username string
+}
+
+func (q *Queries) GetDocument(ctx context.Context, id int32) (GetDocumentRow, error) {
 	row := q.db.QueryRow(ctx, getDocument, id)
-	var i Document
+	var i GetDocumentRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
 		&i.Source,
 		&i.Content,
 		&i.Type,
+		&i.Username,
 	)
 	return i, err
 }
