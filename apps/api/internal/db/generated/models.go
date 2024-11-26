@@ -9,9 +9,11 @@ import (
 )
 
 type Document struct {
-	ID     int32
-	UserID pgtype.Int4
-	Source string
+	ID      int32
+	UserID  pgtype.Int4
+	Source  string
+	Content pgtype.Text
+	Type    string
 }
 
 type Session struct {

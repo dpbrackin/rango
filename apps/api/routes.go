@@ -10,7 +10,7 @@ func addRoutes(app *App) {
 		Srv: app.authSrv,
 	}
 
-	docsHandler := handlers.DocumentsHandler{
+	docsHandler := handlers.DocumentsHTTPHandler{
 		DocSrv: app.documentSrv,
 	}
 

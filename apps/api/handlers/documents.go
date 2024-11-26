@@ -1,16 +1,19 @@
 package handlers
 
 import (
+	"context"
+	"log/slog"
 	"net/http"
 	"rango/api/internal"
 	"rango/core"
+	"rango/platform/eventbus"
 )
 
-type DocumentsHandler struct {
+type DocumentsHTTPHandler struct {
 	DocSrv *internal.DocumentService
 }
 
-func (h *DocumentsHandler) Upload(w http.ResponseWriter, r *http.Request) {
+func (h *DocumentsHTTPHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	reader, header, err := r.FormFile("file")
 
 	if err != nil {
@@ -40,4 +43,48 @@ func (h *DocumentsHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+type DocumentEventHandler struct {
+	indexSrv    *internal.IndexService
+	documentSrv *internal.DocumentService
+}
+
+type NewDocumentEventHandlerParams struct {
+	IndexSrv    *internal.IndexService
+	DocumentSrv *internal.DocumentService
+}
+
+func NewDocumentEventHandler(params NewDocumentEventHandlerParams) *DocumentEventHandler {
+	return &DocumentEventHandler{
+		indexSrv:    params.IndexSrv,
+		documentSrv: params.DocumentSrv,
+	}
+}
+
+func (w *DocumentEventHandler) HandleDocumentCreatedEvent(event eventbus.Event) {
+	doc, ok := event.Data.(core.Document)
+
+	if !ok {
+		slog.Error("Failed to convert event data to core.Document")
+		return
+	}
+
+	ctx := context.Background()
+
+	err := w.documentSrv.ExtractContent(ctx, &doc)
+
+	if err != nil {
+		slog.Error("Content extraction failed", slog.String("error", err.Error()))
+		return
+	}
+
+	err = w.indexSrv.IndexDocument(ctx, internal.IndexDocumentParams{
+		Document: doc,
+	})
+
+	if err != nil {
+		slog.Error("Indexing Failed", slog.String("error", err.Error()))
+	}
+
 }

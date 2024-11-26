@@ -3,9 +3,9 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"rango/api/internal/db/generated"
 	"rango/auth"
 	"rango/core"
-	"rango/platform/db/generated"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )

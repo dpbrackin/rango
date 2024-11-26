@@ -7,9 +7,10 @@ import (
 	"os"
 	"os/signal"
 	"rango/api/internal"
+	"rango/api/internal/db/generated"
+	"rango/api/internal/db/repositories"
 	"rango/auth"
-	"rango/platform/db/generated"
-	"rango/platform/db/repositories"
+	"rango/platform/embedding"
 	"rango/platform/eventbus"
 	"rango/platform/storage"
 	"rango/router"
@@ -32,20 +33,23 @@ func main() {
 	}
 
 	queries := generated.New(conn)
+	eb := eventbus.New()
 
 	authSrv := createAuthService(queries)
-	documentSrv := createDocumentSrv(queries)
+	documentSrv := createDocumentSrv(queries, eb)
 	router := createRootRouter()
-	eventBus := eventbus.New()
+	indexSrv := createIndexSrv()
 
 	app := &App{
 		router:      router,
 		authSrv:     authSrv,
 		documentSrv: documentSrv,
-		eventBus:    eventBus,
+		indexSrv:    indexSrv,
+		eventBus:    eb,
 	}
 
 	addRoutes(app)
+	addEventHandlers(app)
 
 	done := make(chan bool, 1)
 
@@ -62,6 +66,7 @@ type App struct {
 	router      *router.Root
 	authSrv     *auth.AuthService
 	documentSrv *internal.DocumentService
+	indexSrv    *internal.IndexService
 	eventBus    *eventbus.EventBus
 	server      *http.Server
 }
@@ -117,7 +122,7 @@ func createAuthService(queries *generated.Queries) *auth.AuthService {
 	})
 }
 
-func createDocumentSrv(queries *generated.Queries) *internal.DocumentService {
+func createDocumentSrv(queries *generated.Queries, eb *eventbus.EventBus) *internal.DocumentService {
 	workingDir, err := os.Getwd()
 
 	if err != nil {
@@ -129,8 +134,9 @@ func createDocumentSrv(queries *generated.Queries) *internal.DocumentService {
 	})
 
 	return &internal.DocumentService{
-		Backend:    storage,
+		Storage:    storage,
 		Repository: repositories.NewPGDocumentRepository(queries),
+		EventBus:   eb,
 	}
 }
 
@@ -139,4 +145,10 @@ func createRootRouter() *router.Root {
 	root.Use(internal.LoggingMiddleware)
 
 	return root
+}
+
+func createIndexSrv() *internal.IndexService {
+	return &internal.IndexService{
+		Embeder: embedding.NewOpenAIEmbedder(),
+	}
 }

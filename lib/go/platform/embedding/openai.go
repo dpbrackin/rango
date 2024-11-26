@@ -38,8 +38,6 @@ func (o *OpenAIEmbedder) Embed(ctx context.Context, r io.Reader) ([][]float64, e
 	})
 
 	if err != nil {
-		fmt.Println(contentStr)
-		fmt.Println(err)
 		return nil, fmt.Errorf("Failed to get embeddings: %w", err)
 	}
 

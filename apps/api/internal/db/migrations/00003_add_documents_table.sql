@@ -3,7 +3,9 @@
 CREATE TABLE documents(
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-  source TEXT NOT NULL
+  source TEXT NOT NULL,
+  content TEXT,
+  type TEXT NOT NULL
 );
 -- +goose StatementEnd
 

@@ -19,13 +19,16 @@ func Core(name string) string {
 
 // Document struct represents a document that can be indexed and used as a source for RAG
 type Document struct {
-	ID     IDType
-	Source string // path to the document's underlying file
-	Owner  User
+	ID      IDType
+	Source  string // path to the document's underlying file
+	Owner   User
+	Content io.Reader
+	Type    string
 }
 
 type DocumentRepository interface {
 	AddDocument(ctx context.Context, d Document) (Document, error)
+	UpdateDocument(ctx context.Context, d Document) error
 }
 
 type UploadParams struct {
@@ -44,4 +47,10 @@ type StorageBackend interface {
 // Embedder creates embeddings for an input
 type Embedder interface {
 	Embed(ctx context.Context, content io.Reader) ([][]float64, error)
+}
+
+// ContentExtractor extracts the text content from a document
+type ContentExtractor interface {
+	// Extract extracts the document's content and writes the content to w
+	Extract(ctx context.Context, doc Document, w io.Writer) error
 }
