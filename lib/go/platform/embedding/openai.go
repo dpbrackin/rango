@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"rango/core"
 
 	"github.com/openai/openai-go"
 )
@@ -21,7 +22,7 @@ func NewOpenAIEmbedder() *OpenAIEmbedder {
 }
 
 // Embed implements core.Embedder.
-func (o *OpenAIEmbedder) Embed(ctx context.Context, r io.Reader) ([][]float64, error) {
+func (o *OpenAIEmbedder) Embed(ctx context.Context, r io.Reader) (core.Embeddings, error) {
 	contents, err := io.ReadAll(r)
 
 	if err != nil {

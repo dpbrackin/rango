@@ -12,6 +12,8 @@ type Clock interface {
 	Now() time.Time
 }
 
+type Embeddings [][]float64
+
 func Core(name string) string {
 	result := "Core " + name
 	return result
@@ -47,11 +49,17 @@ type StorageBackend interface {
 
 // Embedder creates embeddings for an input
 type Embedder interface {
-	Embed(ctx context.Context, content io.Reader) ([][]float64, error)
+	Embed(ctx context.Context, content io.Reader) (Embeddings, error)
 }
 
 // ContentExtractor extracts the text content from a document
 type ContentExtractor interface {
 	// Extract extracts the document's content and writes the content to w
 	Extract(ctx context.Context, doc Document, w io.Writer) error
+}
+
+// VectorStore stores embeddings for a document and searches based on embeddings
+type VectorStore interface {
+	Store(ctx context.Context, doc Document, embeddings Embeddings) error
+	Retrieve(ctx context.Context, embedding Embeddings) ([]Document, error)
 }
