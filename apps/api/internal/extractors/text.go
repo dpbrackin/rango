@@ -3,7 +3,7 @@ package extractors
 import (
 	"context"
 	"io"
-	"rango/core"
+	"rango/api/internal/core"
 )
 
 type TextExtractor struct {

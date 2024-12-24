@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
-	"rango/core"
-	"rango/platform/eventbus"
-	"rango/platform/extractors"
+	"rango/api/internal/core"
+	"rango/api/internal/eventbus"
+	"rango/api/internal/extractors"
 )
 
 type DocumentService struct {

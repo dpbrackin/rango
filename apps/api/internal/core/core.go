@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-type IDType int32
-
 type Clock interface {
 	Now() time.Time
 }
@@ -26,6 +24,12 @@ type Document struct {
 	Owner   User
 	Content io.Reader
 	Type    string
+}
+
+// Index is a collection of documents.
+type Index struct {
+	ID   IDType
+	Name string
 }
 
 type DocumentRepository interface {
@@ -60,6 +64,17 @@ type ContentExtractor interface {
 
 // VectorStore stores embeddings for a document and searches based on embeddings
 type VectorStore interface {
-	Store(ctx context.Context, doc Document, embeddings Embeddings) error
-	Retrieve(ctx context.Context, embedding Embeddings) ([]Document, error)
+	Store(ctx context.Context, params StoreEmbeddingsParams) error
+	Retrieve(ctx context.Context, embedding Embeddings) ([]RetrievalResult, error)
+}
+
+type StoreEmbeddingsParams struct {
+	Doc        Document
+	Embeddings Embeddings
+	Index      Index
+	Text       string
+}
+
+type RetrievalResult struct {
+	Docs Document
 }

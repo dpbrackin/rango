@@ -14,7 +14,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-      "cwd": "apps/api",
+        "cwd": "apps/api",
         "command": "air"
       }
     },
@@ -26,6 +26,20 @@
     },
     "tidy": {
       "executor": "@nx-go/nx-go:tidy"
+    },
+    "db:up": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api/internal/db/migrations",
+        "command": "goose postgres up"
+      }
+    },
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api/internal/db",
+        "command": "sqlc generate"
+      }
     }
   }
 }

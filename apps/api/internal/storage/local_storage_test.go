@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"os"
-	"rango/core"
-	"rango/platform/storage"
+	"rango/api/internal/core"
+	"rango/api/internal/storage"
 	"strings"
 	"testing"
 )

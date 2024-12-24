@@ -1,8 +1,8 @@
 package internal
 
 import (
-	"rango/core"
-	"rango/platform/eventbus"
+	"rango/api/internal/core"
+	"rango/api/internal/eventbus"
 )
 
 const (

@@ -9,16 +9,28 @@ import (
 )
 
 type Document struct {
-	ID      int32
-	UserID  pgtype.Int4
+	ID      pgtype.UUID
+	UserID  pgtype.UUID
 	Source  string
 	Content pgtype.Text
 	Type    string
 }
 
+type Organization struct {
+	ID   pgtype.UUID
+	Name string
+}
+
+type OrganizationMembership struct {
+	ID        pgtype.UUID
+	UserID    pgtype.UUID
+	OrgID     pgtype.UUID
+	IsDefault pgtype.Bool
+}
+
 type Session struct {
 	ID           string
-	UserID       pgtype.Int4
+	UserID       pgtype.UUID
 	CreatedAt    pgtype.Timestamptz
 	RevokedAt    pgtype.Timestamptz
 	ExpiresAt    pgtype.Timestamptz
@@ -26,7 +38,7 @@ type Session struct {
 }
 
 type User struct {
-	ID       int32
+	ID       pgtype.UUID
 	Username string
 	Password string
 }

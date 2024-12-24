@@ -6,8 +6,10 @@ FROM
 WHERE
   username = $1;
 --
--- name: AddUser :exec
-INSERT INTO users(username, password) VALUES ($1,$2);
+-- name: AddUser :one
+INSERT INTO users(username, password)
+VALUES ($1,$2)
+RETURNING *;
 --
 -- name: GetSession :one
 SELECT sessions.*, users.username

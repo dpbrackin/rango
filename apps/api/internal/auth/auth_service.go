@@ -3,32 +3,36 @@ package auth
 import (
 	"context"
 	"fmt"
-	"rango/core"
+	"rango/api/internal/core"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {
-	repository AuthRepository
-	clock      core.Clock
+	authRepository AuthRepository
+	orgRepository  core.OrgatizationRepository
+	clock          core.Clock
 }
 
 type NewAuthServiceParams struct {
-	Repository AuthRepository
-	Clock      core.Clock
+	AuthRepository AuthRepository
+	OrgRepository  core.OrgatizationRepository
+	Clock          core.Clock
 }
 
 func NewAuthService(params NewAuthServiceParams) *AuthService {
 	return &AuthService{
-		repository: params.Repository,
-		clock:      params.Clock,
+		authRepository: params.AuthRepository,
+		orgRepository:  params.OrgRepository,
+		clock:          params.Clock,
 	}
 }
 
 func (srv *AuthService) AuthenticateWithPassword(ctx context.Context, creds PasswordCredentials) (core.User, error) {
 	var user core.User
 
-	dbUser, err := srv.repository.GetUserByUsername(ctx, creds.Username)
+	dbUser, err := srv.authRepository.GetUserByUsername(ctx, creds.Username)
 
 	if err != nil {
 		return user, err
@@ -55,26 +59,28 @@ func (srv *AuthService) Register(ctx context.Context, creds PasswordCredentials)
 		return core.User{}, err
 	}
 
-	err = srv.repository.AddUser(ctx, UserWithPassword{
+	org := core.Organization{
+		ID:   core.IDType(uuid.New()),
+		Name: fmt.Sprintf("%s's Organization", creds.Username),
+	}
+
+	user, err := srv.authRepository.RegisterUser(ctx, UserWithPassword{
 		User: core.User{
 			Username: creds.Username,
+			Org:      org,
 		},
 		Password: string(hashedPassword),
 	})
 
 	if err != nil {
-		return core.User{}, err
-	}
-
-	user := core.User{
-		Username: creds.Username,
+		return core.User{}, fmt.Errorf("Failed to create user: %w", err)
 	}
 
 	return user, nil
 }
 
 func (srv *AuthService) AuthenticateSession(ctx context.Context, sessionID string) (core.User, error) {
-	session, err := srv.repository.GetSession(ctx, sessionID)
+	session, err := srv.authRepository.GetSession(ctx, sessionID)
 
 	if err != nil {
 		return core.User{}, fmt.Errorf("Failed to get session: %w", err)
@@ -99,13 +105,13 @@ func (srv *AuthService) CreateSession(ctx context.Context, user core.User) (*Ses
 		return nil, err
 	}
 
-	err = srv.repository.CreateSession(ctx, *session)
+	err = srv.authRepository.CreateSession(ctx, *session)
 
 	if err != nil {
 		return nil, err
 	}
 
-	createdSession, err := srv.repository.GetSession(ctx, session.ID)
+	createdSession, err := srv.authRepository.GetSession(ctx, session.ID)
 
 	return &createdSession, err
 }

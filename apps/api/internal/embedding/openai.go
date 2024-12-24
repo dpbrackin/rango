@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"rango/core"
+	"rango/api/internal/core"
 
 	"github.com/openai/openai-go"
 )

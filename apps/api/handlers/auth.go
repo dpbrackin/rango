@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"rango/auth"
+	"rango/api/internal/auth"
 	"time"
 )
 

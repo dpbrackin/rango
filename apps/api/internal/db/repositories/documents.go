@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"rango/api/internal/core"
 	"rango/api/internal/db/generated"
-	"rango/core"
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -24,8 +24,8 @@ func NewPGDocumentRepository(queries *generated.Queries) *PGDocumentsRepository 
 // AddDocument implements core.DocumentRepository.
 func (p *PGDocumentsRepository) AddDocument(ctx context.Context, d core.Document) (core.Document, error) {
 	doc, err := p.queries.AddDocument(ctx, generated.AddDocumentParams{
-		UserID: pgtype.Int4{
-			Int32: int32(d.Owner.ID),
+		UserID: pgtype.UUID{
+			Bytes: d.ID,
 			Valid: true,
 		},
 		Source: d.Source,
@@ -33,7 +33,7 @@ func (p *PGDocumentsRepository) AddDocument(ctx context.Context, d core.Document
 	})
 
 	document := core.Document{
-		ID:      core.IDType(doc.ID),
+		ID:      core.IDType(doc.ID.Bytes),
 		Source:  d.Source,
 		Owner:   d.Owner,
 		Content: d.Content,
@@ -51,8 +51,14 @@ func (p *PGDocumentsRepository) UpdateDocument(ctx context.Context, d core.Docum
 	}
 
 	err = p.queries.UpdateDocument(ctx, generated.UpdateDocumentParams{
-		ID:      int32(d.ID),
-		UserID:  pgtype.Int4{Int32: int32(d.Owner.ID), Valid: true},
+		ID: pgtype.UUID{
+			Bytes: d.ID,
+			Valid: true,
+		},
+		UserID: pgtype.UUID{
+			Bytes: d.Owner.ID,
+			Valid: true,
+		},
 		Source:  d.Source,
 		Content: pgtype.Text{String: string(contentBytes), Valid: true},
 		Type:    d.Type,
@@ -62,7 +68,10 @@ func (p *PGDocumentsRepository) UpdateDocument(ctx context.Context, d core.Docum
 }
 
 func (p *PGDocumentsRepository) GetDocument(ctx context.Context, Id core.IDType) (core.Document, error) {
-	doc, err := p.queries.GetDocument(ctx, int32(Id))
+	doc, err := p.queries.GetDocument(ctx, pgtype.UUID{
+		Bytes: Id,
+		Valid: true,
+	})
 
 	if err != nil {
 		return core.Document{}, fmt.Errorf("Failed to get document from DB: %w", err)
@@ -72,7 +81,7 @@ func (p *PGDocumentsRepository) GetDocument(ctx context.Context, Id core.IDType)
 		ID:     Id,
 		Source: doc.Source,
 		Owner: core.User{
-			ID:       core.IDType(doc.UserID.Int32),
+			ID:       core.IDType(doc.UserID.Bytes),
 			Username: doc.Username,
 		},
 		Content: strings.NewReader(doc.Content.String),

@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 	"rango/api/internal"
-	"rango/core"
-	"rango/platform/eventbus"
+	"rango/api/internal/core"
+	"rango/api/internal/eventbus"
 )
 
 type DocumentsHTTPHandler struct {

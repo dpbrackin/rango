@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
-	"rango/core"
+	"rango/api/internal/core"
 	"time"
 )
 
@@ -26,9 +26,11 @@ type UserWithPassword struct {
 
 type AuthRepository interface {
 	GetUserByUsername(ctx context.Context, username string) (UserWithPassword, error)
-	AddUser(ctx context.Context, params UserWithPassword) error
+	AddUser(ctx context.Context, params UserWithPassword) (core.User, error)
 	GetSession(ctx context.Context, sessionID string) (Session, error)
 	CreateSession(ctx context.Context, session Session) error
+	// RegisterUser registers a user and creates their organization
+	RegisterUser(ctx context.Context, params UserWithPassword) (core.User, error)
 }
 
 type PasswordCredentials struct {

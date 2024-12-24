@@ -11,8 +11,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const addUser = `-- name: AddUser :exec
-INSERT INTO users(username, password) VALUES ($1,$2)
+const addUser = `-- name: AddUser :one
+INSERT INTO users(username, password)
+VALUES ($1,$2)
+RETURNING id, username, password
 `
 
 type AddUserParams struct {
@@ -20,9 +22,11 @@ type AddUserParams struct {
 	Password string
 }
 
-func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) error {
-	_, err := q.db.Exec(ctx, addUser, arg.Username, arg.Password)
-	return err
+func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, addUser, arg.Username, arg.Password)
+	var i User
+	err := row.Scan(&i.ID, &i.Username, &i.Password)
+	return i, err
 }
 
 const createSession = `-- name: CreateSession :exec
@@ -31,7 +35,7 @@ INSERT INTO sessions(id, user_id, expires_at) VALUES ($1, $2, $3)
 
 type CreateSessionParams struct {
 	ID        string
-	UserID    pgtype.Int4
+	UserID    pgtype.UUID
 	ExpiresAt pgtype.Timestamptz
 }
 
@@ -48,7 +52,7 @@ WHERE sessions.id = $1
 
 type GetSessionRow struct {
 	ID           string
-	UserID       pgtype.Int4
+	UserID       pgtype.UUID
 	CreatedAt    pgtype.Timestamptz
 	RevokedAt    pgtype.Timestamptz
 	ExpiresAt    pgtype.Timestamptz

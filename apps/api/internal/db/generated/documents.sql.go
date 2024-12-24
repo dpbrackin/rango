@@ -22,7 +22,7 @@ RETURNING id, user_id, source, content, type
 `
 
 type AddDocumentParams struct {
-	UserID  pgtype.Int4
+	UserID  pgtype.UUID
 	Source  string
 	Content pgtype.Text
 	Type    string
@@ -53,15 +53,15 @@ WHERE documents.id = $1
 `
 
 type GetDocumentRow struct {
-	ID       int32
-	UserID   pgtype.Int4
+	ID       pgtype.UUID
+	UserID   pgtype.UUID
 	Source   string
 	Content  pgtype.Text
 	Type     string
 	Username string
 }
 
-func (q *Queries) GetDocument(ctx context.Context, id int32) (GetDocumentRow, error) {
+func (q *Queries) GetDocument(ctx context.Context, id pgtype.UUID) (GetDocumentRow, error) {
 	row := q.db.QueryRow(ctx, getDocument, id)
 	var i GetDocumentRow
 	err := row.Scan(
@@ -82,8 +82,8 @@ where id = $1
 `
 
 type UpdateDocumentParams struct {
-	ID      int32
-	UserID  pgtype.Int4
+	ID      pgtype.UUID
+	UserID  pgtype.UUID
 	Source  string
 	Content pgtype.Text
 	Type    string

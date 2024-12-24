@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE sessions(
   id TEXT PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   revoked_at TIMESTAMPTZ NULL,
   expires_at TIMESTAMPTZ NOT NULL,

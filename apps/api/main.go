@@ -7,12 +7,12 @@ import (
 	"os"
 	"os/signal"
 	"rango/api/internal"
+	"rango/api/internal/auth"
 	"rango/api/internal/db/generated"
 	"rango/api/internal/db/repositories"
-	"rango/auth"
-	"rango/platform/embedding"
-	"rango/platform/eventbus"
-	"rango/platform/storage"
+	"rango/api/internal/embedding"
+	"rango/api/internal/eventbus"
+	"rango/api/internal/storage"
 	"rango/router"
 	"syscall"
 	"time"
@@ -35,7 +35,7 @@ func main() {
 	queries := generated.New(conn)
 	eb := eventbus.New()
 
-	authSrv := createAuthService(queries)
+	authSrv := createAuthService(queries, conn)
 	documentSrv := createDocumentSrv(queries, eb)
 	router := createRootRouter()
 	indexSrv := createIndexSrv()
@@ -115,10 +115,11 @@ func (r *RealClock) Now() time.Time {
 	return time.Now()
 }
 
-func createAuthService(queries *generated.Queries) *auth.AuthService {
+func createAuthService(queries *generated.Queries, conn *pgx.Conn) *auth.AuthService {
 	return auth.NewAuthService(auth.NewAuthServiceParams{
-		Repository: repositories.NewPGAuthRepository(queries),
-		Clock:      &RealClock{},
+		AuthRepository: repositories.NewPGAuthRepository(conn),
+		OrgRepository:  repositories.NewPGOrganizationRepository(queries),
+		Clock:          &RealClock{},
 	})
 }
 

@@ -3,17 +3,23 @@ package auth_test
 import (
 	"context"
 	"fmt"
-	"rango/auth"
-	"rango/core"
+	"rango/api/internal/auth"
+	"rango/api/internal/core"
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 type mockAuthRepository struct {
 	mock.Mock
+}
+
+// RegisterUser implements auth.AuthRepository.
+func (m *mockAuthRepository) RegisterUser(ctx context.Context, params auth.UserWithPassword) (core.User, error) {
+	panic("unimplemented")
 }
 
 type mockClock struct {
@@ -28,10 +34,15 @@ func (m *mockClock) Now() time.Time {
 }
 
 // AddUser implements auth.AuthRepository.
-func (m *mockAuthRepository) AddUser(ctx context.Context, params auth.UserWithPassword) error {
+func (m *mockAuthRepository) AddUser(ctx context.Context, params auth.UserWithPassword) (core.User, error) {
 	args := m.Called(ctx, params)
 
-	return args.Error(0)
+	user, ok := args.Get(0).(core.User)
+	if !ok {
+		return core.User{}, fmt.Errorf("expected core.User, but got %T", args.Get(0))
+	}
+
+	return user, args.Error(1)
 }
 
 // GetSession implements auth.AuthRepository.
@@ -70,7 +81,7 @@ func TestValidAuthenticateSession(t *testing.T) {
 		ID: "session1",
 		User: core.User{
 			Username: "user1",
-			ID:       core.IDType(1),
+			ID:       core.IDType(uuid.New()),
 		},
 		CreatedAt:    time.Date(2024, 12, 12, 0, 0, 0, 0, time.UTC),
 		RevokedAt:    time.Time{},
@@ -86,8 +97,8 @@ func TestValidAuthenticateSession(t *testing.T) {
 	fakeClock.On("Now").Return(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC))
 
 	service := auth.NewAuthService(auth.NewAuthServiceParams{
-		Repository: repository,
-		Clock:      fakeClock,
+		AuthRepository: repository,
+		Clock:          fakeClock,
 	})
 
 	ctx := context.Background()
@@ -102,7 +113,7 @@ func TestExpiredSession(t *testing.T) {
 		ID: "session1",
 		User: core.User{
 			Username: "user1",
-			ID:       core.IDType(1),
+			ID:       core.IDType(uuid.New()),
 		},
 		CreatedAt:    time.Date(2023, 12, 12, 0, 0, 0, 0, time.UTC),
 		RevokedAt:    time.Time{},
@@ -118,8 +129,8 @@ func TestExpiredSession(t *testing.T) {
 	fakeClock.On("Now").Return(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC))
 
 	service := auth.NewAuthService(auth.NewAuthServiceParams{
-		Repository: repository,
-		Clock:      fakeClock,
+		AuthRepository: repository,
+		Clock:          fakeClock,
 	})
 
 	ctx := context.Background()
@@ -133,7 +144,7 @@ func TestRevokedSession(t *testing.T) {
 		ID: "session1",
 		User: core.User{
 			Username: "user1",
-			ID:       core.IDType(1),
+			ID:       core.IDType(uuid.New()),
 		},
 		CreatedAt:    time.Date(2022, 12, 12, 0, 0, 0, 0, time.UTC),
 		RevokedAt:    time.Date(2024, 12, 12, 0, 0, 0, 0, time.UTC),
@@ -149,8 +160,8 @@ func TestRevokedSession(t *testing.T) {
 	fakeClock.On("Now").Return(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC))
 
 	service := auth.NewAuthService(auth.NewAuthServiceParams{
-		Repository: repository,
-		Clock:      fakeClock,
+		AuthRepository: repository,
+		Clock:          fakeClock,
 	})
 
 	ctx := context.Background()

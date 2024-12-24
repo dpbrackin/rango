@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"rango/auth"
+	"rango/api/internal/auth"
 	"rango/router"
 	"time"
 )
