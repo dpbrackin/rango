@@ -17,7 +17,7 @@ ON organization_memberships (user_id)
 WHERE is_default;
 
 CREATE UNIQUE INDEX unique_user_per_org
-ON organization_memberships (user_id, org_id)
+ON organization_memberships (user_id, org_id);
 -- +goose StatementEnd
 
 -- +goose Down

@@ -1,10 +1,9 @@
-package embedding
+package search
 
 import (
 	"context"
 	"fmt"
 	"io"
-	"rango/api/internal/core"
 
 	"github.com/openai/openai-go"
 )
@@ -22,7 +21,7 @@ func NewOpenAIEmbedder() *OpenAIEmbedder {
 }
 
 // Embed implements core.Embedder.
-func (o *OpenAIEmbedder) Embed(ctx context.Context, r io.Reader) (core.Embeddings, error) {
+func (o *OpenAIEmbedder) Embed(ctx context.Context, r io.Reader) ([]Embedding, error) {
 	contents, err := io.ReadAll(r)
 
 	if err != nil {
@@ -42,7 +41,7 @@ func (o *OpenAIEmbedder) Embed(ctx context.Context, r io.Reader) (core.Embedding
 		return nil, fmt.Errorf("Failed to get embeddings: %w", err)
 	}
 
-	embeddings := make([][]float64, len(res.Data))
+	embeddings := make([]Embedding, len(res.Data))
 
 	for i, e := range res.Data {
 		embeddings[i] = e.Embedding

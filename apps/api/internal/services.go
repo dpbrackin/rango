@@ -10,6 +10,7 @@ import (
 	"rango/api/internal/core"
 	"rango/api/internal/eventbus"
 	"rango/api/internal/extractors"
+	"rango/api/internal/search"
 )
 
 type DocumentService struct {
@@ -25,7 +26,7 @@ type AddDocumentParams struct {
 }
 
 type IndexService struct {
-	Embeder core.Embedder
+	Embeder search.Embedder
 }
 
 type IndexDocumentParams struct {

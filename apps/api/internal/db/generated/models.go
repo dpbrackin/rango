@@ -16,6 +16,18 @@ type Document struct {
 	Type    string
 }
 
+type Index struct {
+	ID     pgtype.UUID
+	OrgID  pgtype.UUID
+	Name   string
+	Engine string
+}
+
+type IndexDocument struct {
+	IndexID    pgtype.UUID
+	DocumentID pgtype.UUID
+}
+
 type Organization struct {
 	ID   pgtype.UUID
 	Name string

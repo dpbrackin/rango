@@ -10,8 +10,6 @@ type Clock interface {
 	Now() time.Time
 }
 
-type Embeddings [][]float64
-
 func Core(name string) string {
 	result := "Core " + name
 	return result
@@ -28,14 +26,22 @@ type Document struct {
 
 // Index is a collection of documents.
 type Index struct {
-	ID   IDType
-	Name string
+	ID     IDType
+	Name   string
+	Engine string
+	Org    Organization
 }
 
 type DocumentRepository interface {
 	AddDocument(ctx context.Context, d Document) (Document, error)
 	UpdateDocument(ctx context.Context, d Document) error
 	GetDocument(ctx context.Context, id IDType) (Document, error)
+}
+
+type IndexRepository interface {
+	CreateIndex(ctx context.Context, i Index) (Index, error)
+	GetIndex(ctx context.Context, id IDType) (Index, error)
+	ListDocuments(ctx context.Context, i Index, p Pagination) ([]Document, error)
 }
 
 type UploadParams struct {
@@ -51,30 +57,30 @@ type StorageBackend interface {
 	Download(ctx context.Context, name string, w io.Writer) error
 }
 
-// Embedder creates embeddings for an input
-type Embedder interface {
-	Embed(ctx context.Context, content io.Reader) (Embeddings, error)
-}
-
 // ContentExtractor extracts the text content from a document
 type ContentExtractor interface {
 	// Extract extracts the document's content and writes the content to w
 	Extract(ctx context.Context, doc Document, w io.Writer) error
 }
 
-// VectorStore stores embeddings for a document and searches based on embeddings
-type VectorStore interface {
-	Store(ctx context.Context, params StoreEmbeddingsParams) error
-	Retrieve(ctx context.Context, embedding Embeddings) ([]RetrievalResult, error)
+type SearchEngine interface {
+	CreateIndex(ctx context.Context, params CreateSearchIndexParams) error
+	AddToIndex(ctx context.Context, params AddToIndexParams) error
+	Search(ctx context.Context, params SearchParams) (SearchResult, error)
 }
 
-type StoreEmbeddingsParams struct {
-	Doc        Document
-	Embeddings Embeddings
-	Index      Index
-	Text       string
+type CreateSearchIndexParams struct {
+	Index Index
 }
 
-type RetrievalResult struct {
-	Docs Document
+type AddToIndexParams struct {
+	Document Document
+}
+
+type SearchParams struct {
+	Query string
+}
+
+type SearchResult struct {
+	Documents []Document
 }

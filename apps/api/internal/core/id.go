@@ -18,3 +18,7 @@ func (id *IDType) UnmarshalText(data []byte) error {
 	*id = IDType(i)
 	return nil
 }
+
+func (id *IDType) String() string {
+	return uuid.UUID(*id).String()
+}

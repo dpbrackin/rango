@@ -10,8 +10,8 @@ import (
 	"rango/api/internal/auth"
 	"rango/api/internal/db/generated"
 	"rango/api/internal/db/repositories"
-	"rango/api/internal/embedding"
 	"rango/api/internal/eventbus"
+	"rango/api/internal/search"
 	"rango/api/internal/storage"
 	"rango/router"
 	"syscall"
@@ -46,6 +46,7 @@ func main() {
 		documentSrv: documentSrv,
 		indexSrv:    indexSrv,
 		eventBus:    eb,
+		db:          conn,
 	}
 
 	addRoutes(app)
@@ -69,6 +70,7 @@ type App struct {
 	indexSrv    *internal.IndexService
 	eventBus    *eventbus.EventBus
 	server      *http.Server
+	db          generated.DBTX
 }
 
 func (app *App) ServeHttp(addr string) {
@@ -150,6 +152,6 @@ func createRootRouter() *router.Root {
 
 func createIndexSrv() *internal.IndexService {
 	return &internal.IndexService{
-		Embeder: embedding.NewOpenAIEmbedder(),
+		Embeder: search.NewOpenAIEmbedder(),
 	}
 }

@@ -5,7 +5,8 @@ CREATE TABLE documents(
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   source TEXT NOT NULL,
   content TEXT,
-  type TEXT NOT NULL
+  type TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 -- +goose StatementEnd
 
